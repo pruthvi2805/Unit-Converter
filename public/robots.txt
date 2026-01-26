@@ -1,0 +1,35 @@
+# Robots.txt for convert.kpruthvi.com
+# Unit Converter & Calculator
+
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://convert.kpruthvi.com/sitemap.xml
+
+# Google specific
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+# Bing
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Prevent crawling of potential dynamic routes that shouldn't be indexed
+Disallow: /api/
+Disallow: /*.json$
+Disallow: /*?*
+
+# Allow all static assets
+Allow: /*.js$
+Allow: /*.css$
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.svg$
+Allow: /*.webp$
+
+# Host
+Host: https://convert.kpruthvi.com

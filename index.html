@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#e85d04" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Convert" />
+
+    <!-- SEO Meta Tags -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="author" content="kpruthvi" />
+    <meta name="generator" content="Vite" />
+    <link rel="canonical" href="https://convert.kpruthvi.com/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Convert - Free Unit Converter" />
+    <meta property="og:title" content="Free Unit Converter - 500+ Conversions, Currency, Length, Weight" />
+    <meta property="og:description" content="Convert units instantly. 500+ conversions across 30+ categories. Live currency rates for 48 currencies. Length, weight, temperature, volume and more. Free, fast, works offline." />
+    <meta property="og:url" content="https://convert.kpruthvi.com/" />
+    <meta property="og:image" content="https://convert.kpruthvi.com/favicon.svg" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Free Unit Converter - 500+ Conversions, Currency, Length, Weight" />
+    <meta name="twitter:description" content="Convert units instantly. 500+ conversions, 48 live currencies. Length, weight, temperature, volume. Free and works offline." />
+    <meta name="twitter:image" content="https://convert.kpruthvi.com/favicon.svg" />
+
+    <!-- Prevent white flash by applying theme before page renders -->
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+    <style>
+      /* Critical: Set dark background immediately to prevent flash */
+      html { background-color: #0d0d0d; }
+      html[data-theme="light"] { background-color: #ffffff; }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Free Unit Converter Online - Length, Weight, Currency, Temperature | Convert</title>
+    <meta name="description" content="Free online unit converter with 500+ conversions. Convert length, weight, temperature, volume, currency (48 live rates) and more. Fast, accurate, private, works offline. No ads, no tracking.">
+    <meta name="keywords" content="unit converter, free converter, length converter, weight converter, temperature converter, currency converter, online converter, metric converter, imperial converter, km to miles, kg to lbs, celsius to fahrenheit">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

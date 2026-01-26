@@ -1,0 +1,46 @@
+.breadcrumbs {
+  margin-bottom: var(--space-4);
+}
+
+.breadcrumb-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.breadcrumb-separator {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.breadcrumb-link {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.breadcrumb-current {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ============================================
+   HOVER EFFECTS - Only for devices with hover
+   ============================================ */
+@media (hover: hover) and (pointer: fine) {
+  .breadcrumb-link {
+    transition: color var(--transition-fast);
+  }
+
+  .breadcrumb-link:hover {
+    color: var(--color-accent);
+  }
+}
