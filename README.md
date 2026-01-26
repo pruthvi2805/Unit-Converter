@@ -220,8 +220,8 @@ Works **offline** as a Progressive Web App - install it once and use it anywhere
 <br/>
 
 ```bash
-git clone https://github.com/pruthvi2805/convert.git
-cd convert
+git clone https://github.com/pruthvi2805/Unit-Converter.git
+cd Unit-Converter
 npm install
 npm run dev
 ```
@@ -374,7 +374,7 @@ Contributions welcome! Fork, create a branch, and submit a PR.
 
 <br/>
 
-<a href="https://github.com/pruthvi2805/convert/fork">
+<a href="https://github.com/pruthvi2805/Unit-Converter/fork">
 <img src="https://img.shields.io/badge/Fork_this_repo-171717?style=for-the-badge&logo=github&logoColor=white" alt="Fork"/>
 </a>
 
