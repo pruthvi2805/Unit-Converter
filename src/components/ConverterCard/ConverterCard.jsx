@@ -10,6 +10,7 @@ function ConverterCard({
   additionalUnits = null,
   renderCustomInput = null,
   renderCustomOutput = null,
+  inputType = 'numeric', // NEW: 'numeric' | 'text' | 'hex' | 'time' | 'ratio'
 }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const [fromValue, setFromValue] = useState(() => searchParams.get('value') || '')
@@ -35,13 +36,42 @@ function ConverterCard({
     doConvert(fromValue)
   }, [fromValue, doConvert])
 
+  // Get validation pattern based on input type
+  const getValidationPattern = (type) => {
+    switch(type) {
+      case 'numeric':
+        // Numbers, decimal point, negative sign, scientific notation
+        return /^-?\d*\.?\d*([eE][-+]?\d*)?$/
+      case 'text':
+        // Allow any text (for base64, ASCII converter, etc.)
+        return /^[\s\S]*$/
+      case 'hex':
+        // Hexadecimal values (with optional # prefix)
+        return /^#?[0-9A-Fa-f]*$/
+      case 'time':
+        // Time format (HH:MM or MM:SS with colons)
+        return /^[\d:]*$/
+      case 'ratio':
+        // Ratios and fractions (4:8 or 1/2)
+        return /^[\d:\/\s]*$/
+      case 'formula':
+        // Math expressions (for calculators)
+        return /^[\d\s+\-*/().=a-zA-Z]*$/
+      default:
+        // Default to numeric
+        return /^-?\d*\.?\d*([eE][-+]?\d*)?$/
+    }
+  }
+
   // Handle input change
   const handleFromChange = (e) => {
     const value = e.target.value
-    // Allow numbers, decimal point, negative sign, and scientific notation (e/E)
-    // Limit input length to 20 characters to prevent absurdly large inputs
-    if (value.length > 20) return
-    if (value === '' || /^-?\d*\.?\d*([eE][-+]?\d*)?$/.test(value)) {
+    // Limit input length based on type (text types can be longer)
+    const maxLength = inputType === 'text' ? 1000 : 50
+    if (value.length > maxLength) return
+    
+    const pattern = getValidationPattern(inputType)
+    if (value === '' || pattern.test(value)) {
       setFromValue(value)
     }
   }
