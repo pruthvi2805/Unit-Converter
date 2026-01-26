@@ -989,9 +989,13 @@ export const calculatePercentageAdvanced = (value, operation, percent) => {
 
 // Ratio calculator
 export const simplifyRatio = (a, b) => {
-  if (isNaN(a) || isNaN(b) || a === '' || b === '' || b === 0) return '';
+  if (isNaN(a) || isNaN(b) || a === '' || b === '') return '';
   const numA = parseFloat(a);
   const numB = parseFloat(b);
+  
+  // Validate both numbers are valid and at least one is non-zero
+  if (!isFinite(numA) || !isFinite(numB)) return 'Invalid input';
+  if (numA === 0 && numB === 0) return '0:0';
 
   // Find GCD
   const gcd = (x, y) => (y === 0 ? x : gcd(y, x % y));
@@ -1009,9 +1013,17 @@ export const scaleRatio = (a, b, targetA) => {
 
 // Proportion solver: a/b = c/x, solve for x
 export const solveProportions = (a, b, c) => {
-  if (isNaN(a) || isNaN(b) || isNaN(c) || a === 0) return '';
+  if (isNaN(a) || isNaN(b) || isNaN(c)) return '';
+  const numA = parseFloat(a);
+  const numB = parseFloat(b);
+  const numC = parseFloat(c);
+  
+  // Validate inputs
+  if (!isFinite(numA) || !isFinite(numB) || !isFinite(numC)) return 'Invalid input';
+  if (numA === 0) return 'Cannot divide by zero';
+  
   // a/b = c/x => x = (b * c) / a
-  return formatResult((parseFloat(b) * parseFloat(c)) / parseFloat(a));
+  return formatResult((numB * numC) / numA);
 };
 
 // Compound interest calculator

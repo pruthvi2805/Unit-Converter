@@ -612,7 +612,7 @@ function ConverterPage({ converter, category }) {
         <ConverterCard
           fromUnit={converter.fromUnit}
           toUnit={converter.toUnit}
-          convert={convertFn || (() => '')}
+          convert={convertFn || (() => 'Converter not implemented')}
           inputType={inputType}
         />
 

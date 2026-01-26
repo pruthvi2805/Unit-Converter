@@ -4,6 +4,7 @@ import Layout from './components/Layout/Layout'
 import HomePage from './pages/HomePage'
 import CategoryPage from './pages/CategoryPage'
 import ConverterPage from './pages/ConverterPage'
+import ErrorBoundary from './components/ErrorBoundary'
 import { categories } from './data/converterRoutes'
 
 // Lazy load less frequently accessed pages
@@ -23,33 +24,35 @@ const PageLoader = () => (
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Layout />}>
-        <Route index element={<HomePage />} />
-        <Route path="categories" element={<Suspense fallback={<PageLoader />}><AllCategoriesPage /></Suspense>} />
-        <Route path="privacy" element={<Suspense fallback={<PageLoader />}><PrivacyPage /></Suspense>} />
+    <ErrorBoundary>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<HomePage />} />
+          <Route path="categories" element={<Suspense fallback={<PageLoader />}><AllCategoriesPage /></Suspense>} />
+          <Route path="privacy" element={<Suspense fallback={<PageLoader />}><PrivacyPage /></Suspense>} />
 
-        {/* Special pages with custom UIs */}
-        <Route path="currency" element={<Suspense fallback={<PageLoader />}><CurrencyPage /></Suspense>} />
-        <Route path="currency/:pair" element={<Suspense fallback={<PageLoader />}><CurrencyPage /></Suspense>} />
+          {/* Special pages with custom UIs */}
+          <Route path="currency" element={<Suspense fallback={<PageLoader />}><CurrencyPage /></Suspense>} />
+          <Route path="currency/:pair" element={<Suspense fallback={<PageLoader />}><CurrencyPage /></Suspense>} />
 
-        {/* Dynamic category and converter routes */}
-        {categories.map(category => (
-          <Route key={category.slug} path={category.slug}>
-            <Route index element={<CategoryPage category={category} />} />
-            {category.converters.map(converter => (
-              <Route
-                key={converter.slug}
-                path={converter.slug}
-                element={<ConverterPage converter={converter} category={category} />}
-              />
-            ))}
-          </Route>
-        ))}
+          {/* Dynamic category and converter routes */}
+          {categories.map(category => (
+            <Route key={category.slug} path={category.slug}>
+              <Route index element={<CategoryPage category={category} />} />
+              {category.converters.map(converter => (
+                <Route
+                  key={converter.slug}
+                  path={converter.slug}
+                  element={<ConverterPage converter={converter} category={category} />}
+                />
+              ))}
+            </Route>
+          ))}
 
-        <Route path="*" element={<Suspense fallback={<PageLoader />}><NotFound /></Suspense>} />
-      </Route>
-    </Routes>
+          <Route path="*" element={<Suspense fallback={<PageLoader />}><NotFound /></Suspense>} />
+        </Route>
+      </Routes>
+    </ErrorBoundary>
   )
 }
 
