@@ -498,6 +498,44 @@ const getSpecialConvert = (category, slug, fromUnit, toUnit) => {
   return null
 }
 
+// Determine input type based on converter category and slug
+const getInputType = (category, slug) => {
+  // Programmer tools that need special input
+  if (category === 'programmer') {
+    if (slug === 'base64' || slug === 'ascii-converter') return 'text'
+    if (slug === 'color-converter' || slug === 'hex-to-decimal' || slug === 'decimal-to-hex') return 'hex'
+    return 'text' // Most programmer tools accept text/alphanumeric
+  }
+  
+  // Time-based converters
+  if (category === 'time' || category === 'speed') {
+    if (slug === 'pace-converter' || slug === 'unix-timestamp') return 'time'
+    if (slug === 'duration-calculator') return 'formula'
+  }
+  
+  // Fitness converters with time format
+  if (category === 'fitness') {
+    if (slug === 'pace-min-km-to-min-mile') return 'time'
+  }
+  
+  // Calculator tools
+  if (category === 'calculators' || category === 'misc') {
+    if (slug === 'percentage-calculator') return 'formula'
+    if (slug === 'ratio-calculator' || slug === 'proportion-solver') return 'ratio'
+    if (slug === 'sleep-calculator') return 'time'
+    if (slug === 'download-time' || slug === 'trip-calculator') return 'formula'
+  }
+  
+  // Numbers & Math
+  if (category === 'numbers') {
+    if (slug === 'fractions-decimals') return 'ratio'
+    if (slug === 'scientific-notation' || slug === 'significant-figures') return 'numeric'
+  }
+  
+  // Default to numeric for standard converters
+  return 'numeric'
+}
+
 function ConverterPage({ converter, category }) {
   const breadcrumbs = [
     { label: 'Home', href: '/' },
@@ -524,6 +562,9 @@ function ConverterPage({ converter, category }) {
       }
     }
   }
+  
+  // Determine input type for this converter
+  const inputType = getInputType(category.slug, converter.slug)
 
   // Find related converters
   const relatedConverters = allConverters
@@ -557,6 +598,7 @@ function ConverterPage({ converter, category }) {
           fromUnit={converter.fromUnit}
           toUnit={converter.toUnit}
           convert={convertFn || (() => '')}
+          inputType={inputType}
         />
 
         {/* How to Convert */}
