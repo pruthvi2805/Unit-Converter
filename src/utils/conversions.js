@@ -164,6 +164,9 @@ export const convert = (value, fromUnit, toUnit, conversionTable, baseUnit) => {
 
 // Format result with appropriate precision
 export const formatResult = (num) => {
+  // Handle invalid inputs
+  if (typeof num !== 'number' || isNaN(num)) return 'Invalid result';
+  
   // Handle zero
   if (num === 0) return '0';
 
@@ -319,12 +322,36 @@ export const convertButterOil = (value, from, to) => {
   return '';
 };
 
-// Percentage calculator
+// Percentage calculator - parse "X of Y" or "X/Y" format
 export const calculatePercentage = (value) => {
-  if (isNaN(value) || value === '') return '';
-  const num = parseFloat(value);
-  // Basic: calculates X% of 100
-  return formatResult(num);
+  if (!value || value === '') return '';
+  
+  // Try to parse "X of Y" format (e.g., "25 of 100")
+  const ofMatch = value.match(/^\s*(\d+\.?\d*)\s+of\s+(\d+\.?\d*)\s*$/i);
+  if (ofMatch) {
+    const part = parseFloat(ofMatch[1]);
+    const whole = parseFloat(ofMatch[2]);
+    if (whole === 0) return 'Cannot divide by zero';
+    const percentage = (part / whole) * 100;
+    return formatResult(percentage);
+  }
+  
+  // Try to parse "X/Y" format (e.g., "25/100")
+  const slashMatch = value.match(/^\s*(\d+\.?\d*)\s*\/\s*(\d+\.?\d*)\s*$/);
+  if (slashMatch) {
+    const part = parseFloat(slashMatch[1]);
+    const whole = parseFloat(slashMatch[2]);
+    if (whole === 0) return 'Cannot divide by zero';
+    const percentage = (part / whole) * 100;
+    return formatResult(percentage);
+  }
+  
+  // If just a single number, return it as-is (for simple percentage display)
+  if (!isNaN(parseFloat(value))) {
+    return formatResult(parseFloat(value));
+  }
+  
+  return 'Enter format: "25 of 100" or "25/100"';
 };
 
 // Tip calculator (calculates 15% tip by default)

@@ -248,14 +248,29 @@ const getSpecialConvert = (category, slug, fromUnit, toUnit) => {
         if (!value || value === '') return ''
         const parts = value.toString().split(':')
         if (parts.length === 2) {
-          return simplifyRatio(parts[0], parts[1])
+          const result = simplifyRatio(parts[0], parts[1])
+          return result || 'Enter format: "4:8"'
         }
-        return value
+        return 'Enter format: "4:8"'
       }
     }
     if (slug === 'proportion-solver') {
-      // Default: solve for x where 1/2 = value/x
-      return (value) => solveProportions(1, 2, value)
+      // Parse "a/b = c/x" format and solve for x
+      return (value) => {
+        if (!value || value === '') return ''
+        
+        // Try to parse "a/b = c/x" or "a/b = c" format
+        const match = value.match(/^\s*(\d+\.?\d*)\s*\/\s*(\d+\.?\d*)\s*=\s*(\d+\.?\d*)\s*(?:\/\s*x)?\s*$/i)
+        if (match) {
+          const a = parseFloat(match[1])
+          const b = parseFloat(match[2])
+          const c = parseFloat(match[3])
+          const result = solveProportions(a, b, c)
+          return result || 'Invalid proportion'
+        }
+        
+        return 'Enter format: "2/4 = 3/x"'
+      }
     }
     if (slug === 'compound-interest') {
       // Default: 5% annual rate, 10 years, monthly compounding
