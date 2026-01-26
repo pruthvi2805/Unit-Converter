@@ -217,6 +217,15 @@ function CurrencyPage() {
     }
   }, [pair])
 
+  // Safe cache write helper
+  const saveToCache = (data) => {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(data))
+    } catch (e) {
+      console.warn('Cache write failed (storage full or disabled):', e)
+    }
+  }
+
   // Fetch rates
   const fetchRates = useCallback(async () => {
     const cached = localStorage.getItem(CACHE_KEY)
@@ -230,7 +239,9 @@ function CurrencyPage() {
           return
         }
       } catch (e) {
-        localStorage.removeItem(CACHE_KEY)
+        try {
+          localStorage.removeItem(CACHE_KEY)
+        } catch {}
       }
     }
 
@@ -241,7 +252,7 @@ function CurrencyPage() {
       const res = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json')
       if (!res.ok) throw new Error('Failed')
       const data = await res.json()
-      localStorage.setItem(CACHE_KEY, JSON.stringify({ data: data.usd, timestamp: Date.now() }))
+      saveToCache({ data: data.usd, timestamp: Date.now() })
       setRates(data.usd)
       setLastUpdated(new Date())
     } catch {
@@ -249,7 +260,7 @@ function CurrencyPage() {
         const backup = await fetch('https://latest.currency-api.pages.dev/v1/currencies/usd.json')
         if (!backup.ok) throw new Error('Backup failed')
         const data = await backup.json()
-        localStorage.setItem(CACHE_KEY, JSON.stringify({ data: data.usd, timestamp: Date.now() }))
+        saveToCache({ data: data.usd, timestamp: Date.now() })
         setRates(data.usd)
         setLastUpdated(new Date())
       } catch {
@@ -277,8 +288,14 @@ function CurrencyPage() {
   const result = useMemo(() => {
     if (!rates || !amount || isNaN(parseFloat(amount))) return ''
     const num = parseFloat(amount)
-    const fromRate = rates[fromCurrency.toLowerCase()] || 1
-    const toRate = rates[toCurrency.toLowerCase()] || 1
+    const fromRate = rates[fromCurrency.toLowerCase()]
+    const toRate = rates[toCurrency.toLowerCase()]
+    
+    // Validate both rates exist (prevent incorrect conversions with fallback to 1)
+    if (!fromRate || !toRate) {
+      return 'Rate unavailable'
+    }
+    
     const converted = (num / fromRate) * toRate
     if (converted === 0) return '0'
     if (Math.abs(converted) < 0.01) return converted.toFixed(6)
@@ -288,8 +305,14 @@ function CurrencyPage() {
 
   const rate = useMemo(() => {
     if (!rates) return null
-    const fromRate = rates[fromCurrency.toLowerCase()] || 1
-    const toRate = rates[toCurrency.toLowerCase()] || 1
+    const fromRate = rates[fromCurrency.toLowerCase()]
+    const toRate = rates[toCurrency.toLowerCase()]
+    
+    // Validate both rates exist
+    if (!fromRate || !toRate) {
+      return 'N/A'
+    }
+    
     return (toRate / fromRate).toFixed(6)
   }, [rates, fromCurrency, toCurrency])
 
@@ -336,7 +359,8 @@ function CurrencyPage() {
                   className="currency-amount"
                   value={amount}
                   onChange={(e) => {
-                    if (e.target.value === '' || /^[\d.]*$/.test(e.target.value)) {
+                    // Allow only digits and single decimal point
+                    if (e.target.value === '' || /^\d*\.?\d*$/.test(e.target.value)) {
                       setAmount(e.target.value)
                     }
                   }}
