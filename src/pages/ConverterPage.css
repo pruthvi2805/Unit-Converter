@@ -1,142 +1,178 @@
 .converter-page {
-  max-width: 600px;
+  padding-top: var(--space-8);
+  padding-bottom: calc(var(--space-16) + var(--mobile-nav-height));
 }
 
-.converter-header {
-  margin-bottom: var(--space-4);
+.converter-hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.converter-kicker {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.45rem 0.8rem;
+  border-radius: var(--radius-full);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-dark);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .converter-title {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text);
-  margin-bottom: var(--space-1);
+  margin-top: var(--space-3);
+  font-size: clamp(2rem, 1.6rem + 2vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
 }
 
 .converter-description {
-  font-size: var(--font-size-sm);
+  max-width: 46rem;
+  margin-top: var(--space-3);
   color: var(--color-text-secondary);
-  line-height: var(--line-height-normal);
+  font-size: var(--font-size-lg);
+  line-height: 1.7;
 }
 
-/* Sections - Compact */
-.converter-section {
+.converter-hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.converter-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-card);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-transform: capitalize;
+}
+
+.converter-section-grid {
+  display: grid;
+  gap: var(--space-4);
   margin-top: var(--space-6);
 }
 
-.converter-section h2 {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text);
-  margin-bottom: var(--space-2);
-}
-
-.converter-section p {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
-  margin-bottom: var(--space-2);
-}
-
-/* Formula Box - Compact */
-.formula-box {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-md);
-  padding: var(--space-3);
-}
-
-.formula-box code {
-  font-family: 'SF Mono', Monaco, monospace;
-  font-size: var(--font-size-sm);
-  color: var(--color-accent);
-  font-weight: var(--font-weight-medium);
-}
-
-/* Conversions Table - Compact */
-.common-conversions {
-  overflow-x: auto;
-}
-
-.conversions-table {
-  width: 100%;
-  border-collapse: collapse;
+.converter-panel-card {
+  margin-top: var(--space-5);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
   background: var(--color-card);
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  font-size: var(--font-size-sm);
+  box-shadow: var(--shadow-sm);
 }
 
-.conversions-table th,
-.conversions-table td {
-  padding: var(--space-2) var(--space-3);
-  text-align: left;
-  border-bottom: 1px solid var(--color-border-light);
+.converter-panel-card h2 {
+  margin-bottom: var(--space-3);
+  font-size: var(--font-size-xl);
+  line-height: 1.2;
 }
 
-.conversions-table th {
-  background: var(--color-bg-secondary);
-  font-weight: var(--font-weight-medium);
-  font-size: var(--font-size-xs);
+.converter-panel-card p {
   color: var(--color-text-secondary);
+  line-height: 1.7;
 }
 
-.conversions-table td {
-  font-family: monospace;
+.converter-panel-card p + p {
+  margin-top: var(--space-3);
+}
+
+.converter-formula {
+  display: inline-flex;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-secondary);
+  color: var(--color-accent-dark);
+  font-size: var(--font-size-base);
+  font-family: var(--font-mono);
+}
+
+.converter-examples-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.converter-example-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-secondary);
   color: var(--color-text);
+  font-family: var(--font-mono);
 }
 
-.conversions-table tr:last-child td {
-  border-bottom: none;
+.converter-example-row span:last-child {
+  color: var(--color-accent-dark);
 }
 
-/* Related Converters - Compact */
+.converter-section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.converter-section-link {
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
 .related-grid {
   display: grid;
-  gap: var(--space-2);
-  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
 }
 
 .related-card {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: var(--space-3);
-  background: var(--color-card);
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-secondary);
   border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-md);
-  -webkit-tap-highlight-color: transparent;
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .related-name {
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text);
-  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+}
+
+.related-copy {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.55;
 }
 
 .related-units {
-  font-size: 10px;
-  color: var(--color-accent);
-  font-family: monospace;
+  color: var(--color-accent-dark);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-mono);
 }
 
-/* ============================================
-   HOVER EFFECTS - Only for devices with hover
-   ============================================ */
-@media (hover: hover) and (pointer: fine) {
-  .related-card {
-    transition: all var(--transition-fast);
+@media (min-width: 860px) {
+  .converter-section-grid,
+  .related-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
 
+@media (hover: hover) {
   .related-card:hover {
     border-color: var(--color-accent);
-  }
-}
-
-/* Active states for touch feedback */
-@media (hover: none) {
-  .related-card:active {
-    opacity: 0.7;
+    transform: translateY(-2px);
   }
 }

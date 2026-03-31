@@ -9,6 +9,7 @@ function NotFound() {
         title="Page Not Found - 404"
         description="The page you're looking for doesn't exist. Browse our converters to find what you need."
         canonicalPath="/404"
+        noindex
       />
 
       <div className="not-found container">

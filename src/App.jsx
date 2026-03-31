@@ -5,15 +5,12 @@ import HomePage from './pages/HomePage'
 import CategoryPage from './pages/CategoryPage'
 import ConverterPage from './pages/ConverterPage'
 import ErrorBoundary from './components/ErrorBoundary'
-import { categories } from './data/converterRoutes'
+import { categories } from './data/converterRegistry'
 
 // Lazy load less frequently accessed pages
 const AllCategoriesPage = lazy(() => import('./pages/AllCategoriesPage'))
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
 const NotFound = lazy(() => import('./pages/NotFound'))
-
-// Lazy load special pages (custom UIs)
-const CurrencyPage = lazy(() => import('./pages/CurrencyPage'))
 
 // Loading fallback
 const PageLoader = () => (
@@ -30,10 +27,6 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="categories" element={<Suspense fallback={<PageLoader />}><AllCategoriesPage /></Suspense>} />
           <Route path="privacy" element={<Suspense fallback={<PageLoader />}><PrivacyPage /></Suspense>} />
-
-          {/* Special pages with custom UIs */}
-          <Route path="currency" element={<Suspense fallback={<PageLoader />}><CurrencyPage /></Suspense>} />
-          <Route path="currency/:pair" element={<Suspense fallback={<PageLoader />}><CurrencyPage /></Suspense>} />
 
           {/* Dynamic category and converter routes */}
           {categories.map(category => (

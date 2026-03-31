@@ -1,241 +1,255 @@
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { allConverters, popularConverters } from '../../data/converterRoutes'
+import { allConverters, popularConverters } from '../../data/converterRegistry'
 import './SearchBar.css'
 
-// Simple fuzzy match - checks if all chars of pattern appear in text in order
-function fuzzyMatch(text, pattern) {
-  text = text.toLowerCase()
-  pattern = pattern.toLowerCase()
-  let patternIdx = 0
-  for (let i = 0; i < text.length && patternIdx < pattern.length; i++) {
-    if (text[i] === pattern[patternIdx]) {
-      patternIdx++
-    }
-  }
-  return patternIdx === pattern.length
-}
-
-// Score a match - higher is better
-function scoreMatch(converter, searchTerm) {
-  const name = converter.name.toLowerCase()
-  const category = converter.categoryName.toLowerCase()
-  const fromUnit = converter.fromUnit.name.toLowerCase()
-  const toUnit = converter.toUnit.name.toLowerCase()
-  const fromSymbol = converter.fromUnit.symbol.toLowerCase()
-  const toSymbol = converter.toUnit.symbol.toLowerCase()
-
-  let score = 0
-
-  // Exact matches score highest
-  if (name.includes(searchTerm)) score += 100
-  if (name.startsWith(searchTerm)) score += 50
-  if (fromUnit.includes(searchTerm) || toUnit.includes(searchTerm)) score += 40
-  if (fromSymbol === searchTerm || toSymbol === searchTerm) score += 60
-  if (category.includes(searchTerm)) score += 20
-
-  // Word boundary matches (e.g., "km miles" matches "km to miles")
-  const words = searchTerm.split(/\s+/)
-  if (words.length > 1) {
-    const allWordsMatch = words.every(word =>
-      name.includes(word) || fromUnit.includes(word) || toUnit.includes(word) ||
-      fromSymbol.includes(word) || toSymbol.includes(word)
-    )
-    if (allWordsMatch) score += 80
-  }
-
-  // Fuzzy match as fallback
-  if (score === 0 && fuzzyMatch(name, searchTerm)) score += 10
-
-  return score
-}
-
-// Recent searches storage
 const RECENT_SEARCHES_KEY = 'convert-recent-searches'
-const MAX_RECENT_SEARCHES = 5
+const MAX_RECENT_SEARCHES = 6
 
 function getRecentSearches() {
   try {
-    const stored = localStorage.getItem(RECENT_SEARCHES_KEY)
-    return stored ? JSON.parse(stored) : []
+    return JSON.parse(localStorage.getItem(RECENT_SEARCHES_KEY) || '[]')
   } catch {
     return []
   }
 }
 
-function addRecentSearch(path) {
+function saveRecentSearch(path) {
   try {
-    let recent = getRecentSearches()
-    recent = recent.filter(p => p !== path)
-    recent.unshift(path)
-    recent = recent.slice(0, MAX_RECENT_SEARCHES)
-    localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(recent))
+    const recent = getRecentSearches().filter((item) => item !== path)
+    localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify([path, ...recent].slice(0, MAX_RECENT_SEARCHES)))
   } catch {
-    // Ignore storage errors
+    // ignore storage failures
   }
 }
 
-function SearchBar({ autoFocus = false, onClose }) {
-  const [query, setQuery] = useState('')
-  const [results, setResults] = useState([])
-  const [selectedIndex, setSelectedIndex] = useState(0)
-  const [recentSearches, setRecentSearches] = useState([])
-  const inputRef = useRef(null)
-  const navigate = useNavigate()
+function scoreConverter(converter, query, recentPaths) {
+  const normalized = query.toLowerCase().trim()
+  if (!normalized) return 0
 
-  // Load recent searches on mount
-  useEffect(() => {
-    const recent = getRecentSearches()
-      .map(path => allConverters.find(c => c.path === path))
-      .filter(Boolean)
-    setRecentSearches(recent)
-  }, [])
+  const name = converter.name.toLowerCase()
+  const category = converter.categoryName.toLowerCase()
+  const slug = converter.slug.replace(/-/g, ' ')
+  const fromName = converter.fromUnit.name.toLowerCase()
+  const toName = converter.toUnit.name.toLowerCase()
+  const fromSymbol = converter.fromUnit.symbol.toLowerCase()
+  const toSymbol = converter.toUnit.symbol.toLowerCase()
+  const aliases = converter.searchAliases.join(' ').toLowerCase()
 
-  // Get popular converters for suggestions
-  const popularSuggestions = popularConverters.map(path => {
-    return allConverters.find(c => c.path === `/${path}`)
-  }).filter(Boolean).slice(0, 6)
+  let score = 0
 
-  useEffect(() => {
-    if (autoFocus && inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [autoFocus])
+  if (name === normalized) score += 220
+  if (name.startsWith(normalized)) score += 160
+  if (name.includes(normalized)) score += 120
+  if (`${fromName} to ${toName}`.includes(normalized)) score += 100
+  if (fromName.includes(normalized) || toName.includes(normalized)) score += 90
+  if (fromSymbol === normalized || toSymbol === normalized) score += 120
+  if (aliases.includes(normalized)) score += 100
+  if (slug.includes(normalized)) score += 70
+  if (category.includes(normalized)) score += 40
 
-  useEffect(() => {
-    if (!query.trim()) {
-      setResults([])
-      setSelectedIndex(0)
-      return
-    }
-
-    const searchTerm = query.toLowerCase().trim()
-
-    // Score and filter converters
-    const scored = allConverters
-      .map(converter => ({
-        converter,
-        score: scoreMatch(converter, searchTerm)
-      }))
-      .filter(item => item.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 8)
-      .map(item => item.converter)
-
-    setResults(scored)
-    setSelectedIndex(0)
-  }, [query])
-
-  // Show recent searches, then popular, then search results
-  const displayResults = query.trim()
-    ? results
-    : recentSearches.length > 0
-      ? recentSearches
-      : popularSuggestions
-
-  const sectionLabel = query.trim()
-    ? null
-    : recentSearches.length > 0
-      ? 'Recent searches'
-      : 'Popular converters'
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      setSelectedIndex(i => Math.min(i + 1, displayResults.length - 1))
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      setSelectedIndex(i => Math.max(i - 1, 0))
-    } else if (e.key === 'Enter' && displayResults[selectedIndex]) {
-      navigate(displayResults[selectedIndex].path)
-      onClose?.()
-    } else if (e.key === 'Escape') {
-      onClose?.()
+  const terms = normalized.split(/\s+/).filter(Boolean)
+  if (terms.length > 1) {
+    const haystack = `${name} ${fromName} ${toName} ${aliases} ${slug} ${fromSymbol} ${toSymbol}`
+    if (terms.every((term) => haystack.includes(term))) {
+      score += 80
     }
   }
 
+  const recentIndex = recentPaths.indexOf(converter.path)
+  if (recentIndex >= 0) {
+    score += 30 - recentIndex * 4
+  }
+
+  return score
+}
+
+function getPopularSuggestions() {
+  return popularConverters
+    .map((path) => allConverters.find((converter) => converter.path === `/${path}`))
+    .filter(Boolean)
+    .slice(0, 6)
+}
+
+function SearchBar({
+  autoFocus = false,
+  onClose,
+  placeholder = 'Search converters, units, or aliases',
+  variant = 'modal',
+}) {
+  const [query, setQuery] = useState('')
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [recent, setRecent] = useState([])
+  const inputRef = useRef(null)
+  const navigate = useNavigate()
+  const listId = useId()
+
+  useEffect(() => {
+    const recentPaths = getRecentSearches()
+    setRecent(recentPaths
+      .map((path) => allConverters.find((converter) => converter.path === path))
+      .filter(Boolean))
+  }, [])
+
+  useEffect(() => {
+    if (autoFocus) {
+      inputRef.current?.focus()
+    }
+  }, [autoFocus])
+
+  const recentPaths = useMemo(() => recent.map((item) => item.path), [recent])
+
+  const searchResults = useMemo(() => {
+    if (!query.trim()) return []
+    return allConverters
+      .map((converter) => ({
+        converter,
+        score: scoreConverter(converter, query, recentPaths),
+      }))
+      .filter((item) => item.score > 0)
+      .sort((left, right) => right.score - left.score)
+      .slice(0, 8)
+      .map((item) => item.converter)
+  }, [query, recentPaths])
+
+  const popularSuggestions = useMemo(() => getPopularSuggestions(), [])
+
+  const sections = useMemo(() => {
+    if (query.trim()) {
+      return searchResults.length
+        ? [{ label: 'Results', items: searchResults, kind: 'results' }]
+        : []
+    }
+
+    const recentItems = recent.slice(0, MAX_RECENT_SEARCHES)
+    const popularItems = popularSuggestions.filter((item) => !recentItems.some((recentItem) => recentItem.path === item.path))
+    const result = []
+    if (recentItems.length) result.push({ label: 'Recent', items: recentItems, kind: 'recent' })
+    if (popularItems.length) result.push({ label: 'Popular', items: popularItems, kind: 'popular' })
+    return result
+  }, [popularSuggestions, query, recent, searchResults])
+
+  const flatItems = sections.flatMap((section) => section.items)
+
+  useEffect(() => {
+    setActiveIndex(0)
+  }, [query])
+
+  const activeConverter = flatItems[activeIndex] || null
+
   const handleSelect = (converter) => {
-    addRecentSearch(converter.path)
+    saveRecentSearch(converter.path)
+    setRecent((current) => {
+      const next = [converter, ...current.filter((item) => item.path !== converter.path)]
+      return next.slice(0, MAX_RECENT_SEARCHES)
+    })
     navigate(converter.path)
     onClose?.()
   }
 
+  const handleKeyDown = (event) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      setActiveIndex((current) => Math.min(current + 1, Math.max(flatItems.length - 1, 0)))
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      setActiveIndex((current) => Math.max(current - 1, 0))
+    } else if (event.key === 'Enter' && activeConverter) {
+      event.preventDefault()
+      handleSelect(activeConverter)
+    } else if (event.key === 'Escape') {
+      onClose?.()
+    }
+  }
+
+  const rootClassName = `search-bar search-bar-${variant}`
+
   return (
-    <div className="search-bar">
-      <div className="search-input-wrapper">
-        <svg className="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="11" cy="11" r="8" />
-          <line x1="21" y1="21" x2="16.65" y2="16.65" />
-        </svg>
-        <input
-          ref={inputRef}
-          type="text"
-          className="search-input"
-          placeholder="Search converters..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={handleKeyDown}
-          aria-label="Search converters"
-          aria-autocomplete="list"
-          aria-controls="search-results"
-        />
-        {query && (
-          <button
-            className="search-clear"
-            onClick={() => setQuery('')}
-            aria-label="Clear search"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        )}
-        <kbd className="search-shortcut">/</kbd>
-        <button
-          className="search-cancel"
-          onClick={onClose}
-          aria-label="Close search"
-        >
-          Cancel
-        </button>
-      </div>
-
-      {/* Show recent/popular suggestions when empty, search results when typing */}
-      {displayResults.length > 0 && (
-        <div className="search-results-wrapper">
-          {sectionLabel && (
-            <div className="search-section-label">{sectionLabel}</div>
+    <div className={rootClassName}>
+      <div className="search-shell">
+        <label className="visually-hidden" htmlFor={listId}>Search converters</label>
+        <div className="search-input-wrapper">
+          <svg className="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            ref={inputRef}
+            id={listId}
+            className="search-input"
+            type="text"
+            value={query}
+            placeholder={placeholder}
+            role="combobox"
+            aria-expanded={flatItems.length > 0}
+            aria-controls={`${listId}-results`}
+            aria-autocomplete="list"
+            aria-activedescendant={activeConverter ? `${listId}-option-${activeConverter.slug}` : undefined}
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+          {query && (
+            <button className="search-clear" type="button" onClick={() => setQuery('')} aria-label="Clear search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
           )}
-          <ul id="search-results" className="search-results" role="listbox">
-            {displayResults.map((converter, index) => (
-              <li
-                key={converter.path}
-                className={`search-result ${index === selectedIndex ? 'selected' : ''}`}
-                role="option"
-                aria-selected={index === selectedIndex}
-                onClick={() => handleSelect(converter)}
-                onMouseEnter={() => setSelectedIndex(index)}
-              >
-                <div className="search-result-main">
-                  <span className="search-result-name">{converter.name}</span>
-                  <span className="search-result-category">{converter.categoryName}</span>
-                </div>
-                <span className="search-result-units">
-                  {converter.fromUnit.symbol} → {converter.toUnit.symbol}
-                </span>
-              </li>
-            ))}
-          </ul>
+          {variant !== 'hero' && <kbd className="search-shortcut">/</kbd>}
+          {onClose && (
+            <button className="search-close" type="button" onClick={onClose}>
+              Close
+            </button>
+          )}
         </div>
-      )}
 
-      {query && results.length === 0 && (
-        <div className="search-no-results">
-          <p>No converters found for "{query}"</p>
-          <p className="search-hint">Try "meters", "pounds", or "celsius"</p>
-        </div>
-      )}
+        {query.trim() && searchResults.length === 0 && (
+          <div className="search-empty-state">
+            <p>No converters matched “{query}”.</p>
+            <span>Try unit names like “meters”, symbols like “kg”, or aliases like “base64”.</span>
+          </div>
+        )}
+
+        {sections.length > 0 && (
+          <div className="search-results-shell" id={`${listId}-results`}>
+            {sections.map((section) => (
+              <div key={section.label} className="search-section">
+                <div className="search-section-label">{section.label}</div>
+                <ul className="search-results" role="listbox">
+                  {section.items.map((converter) => {
+                    const flatIndex = flatItems.findIndex((item) => item.path === converter.path)
+                    const isActive = flatIndex === activeIndex
+                    return (
+                      <li key={converter.path} role="presentation">
+                        <button
+                          id={`${listId}-option-${converter.slug}`}
+                          type="button"
+                          role="option"
+                          aria-selected={isActive}
+                          className={`search-result ${isActive ? 'is-active' : ''}`}
+                          onMouseEnter={() => setActiveIndex(flatIndex)}
+                          onClick={() => handleSelect(converter)}
+                        >
+                          <span className={`search-result-badge search-result-badge-${section.kind}`}>
+                            {section.kind}
+                          </span>
+                          <span className="search-result-copy">
+                            <span className="search-result-name">{converter.name}</span>
+                            <span className="search-result-meta">
+                              {converter.categoryName} · {converter.fromUnit.symbol} to {converter.toUnit.symbol}
+                            </span>
+                          </span>
+                        </button>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
