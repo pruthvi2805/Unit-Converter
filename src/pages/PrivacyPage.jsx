@@ -123,7 +123,7 @@ function PrivacyPage() {
             <p>
               Convert is open source. You can review the code yourself on{' '}
               <a
-                href="https://github.com/pruthvi2805/convert"
+                href="https://github.com/pruthvi2805/Unit-Converter"
                 target="_blank"
                 rel="noopener noreferrer"
               >
