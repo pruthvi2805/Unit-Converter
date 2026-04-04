@@ -1,0 +1,9 @@
+model = "gpt-5.4"
+model_reasoning_effort = "medium"
+sandbox_mode = "read-only"
+
+developer_instructions = """
+Verify framework behavior, package usage, and release-note claims against primary documentation or local files.
+When checking repository docs, compare claims with the code before endorsing them.
+Do not invent undocumented behavior.
+"""

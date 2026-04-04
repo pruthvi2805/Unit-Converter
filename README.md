@@ -5,6 +5,7 @@ Convert is a privacy-first converter app built with React and Vite. It covers ev
 Current scope:
 - 28 categories
 - 132 converter tools
+- 163 routes
 - no live external-data converters
 - search-first homepage and standardized converter pages
 
@@ -32,6 +33,8 @@ npm run dev
 npm run build
 npm run test:run
 npm run test:e2e
+npm run verify
+npm run verify:full
 ```
 
 ## Project Structure
@@ -54,6 +57,13 @@ scripts/        sitemap generation
 - `npm run build` regenerates `public/sitemap.xml` from the registry data instead of parsing source text.
 - `npm run test:run` verifies the registry contract and key UI behavior.
 - `npm run test:e2e` covers the homepage search, converter interactions, invalid-input recovery, and mobile browse flow.
+- `npm run verify` runs the standard build + test pass used for most changes.
+- `npm run verify:full` adds Playwright coverage for flow-sensitive changes.
+- Agent-specific repo guidance lives in `AGENTS.md`.
+
+## Planning The Next Converters
+
+- Use [`MARKET_RESEARCH.md`](/Users/pruthvikauticwar/Vibe_Code/Convert/MARKET_RESEARCH.md) to research and rank the next converters or calculators before building them.
 
 ## Deployment
 

@@ -1,0 +1,34 @@
+#:schema https://developers.openai.com/codex/config-schema.json
+
+# Project-local Codex defaults for Convert.
+# Keep this file lean so it complements, rather than replaces, user-level config.
+
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+web_search = "live"
+
+persistent_instructions = "Follow the repository AGENTS.md guide. Prefer registry-driven edits, keep docs synced with code, and run verification before wrapping up."
+
+[features]
+multi_agent = true
+
+[profiles.strict]
+approval_policy = "on-request"
+sandbox_mode = "read-only"
+web_search = "cached"
+
+[agents]
+max_threads = 3
+max_depth = 1
+
+[agents.explorer]
+description = "Read-only codebase explorer for tracing converter, routing, and UI behavior before edits."
+config_file = "agents/explorer.toml"
+
+[agents.reviewer]
+description = "Read-only reviewer focused on correctness, regressions, and missing tests."
+config_file = "agents/reviewer.toml"
+
+[agents.docs_researcher]
+description = "Read-only documentation checker for framework, API, and docs-sync questions."
+config_file = "agents/docs-researcher.toml"
